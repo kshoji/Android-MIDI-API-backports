@@ -1,0 +1,40 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 12
+    buildToolsVersion "22.0.1"
+
+    defaultConfig {
+        minSdkVersion 18
+        targetSdkVersion 12
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    maven {
+        url 'https://github.com/kshoji/javax.sound.midi-for-Android/raw/master/javax.sound.midi/repository'
+    }
+    maven {
+        url 'https://github.com/kshoji/USB-MIDI-Driver/raw/master/MIDIDriver/snapshots'
+    }
+    maven {
+        url 'https://github.com/kshoji/BLE-MIDI-for-Android/raw/master/library/repository'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile 'jp.kshoji:javax-sound-midi:0.0.3:@aar'
+    compile 'jp.kshoji:midi-driver:0.1.4:@aar'
+    compile 'jp.kshoji:ble-midi:0.0.9:@aar'
+    testCompile 'junit:junit:4.12'
+}
