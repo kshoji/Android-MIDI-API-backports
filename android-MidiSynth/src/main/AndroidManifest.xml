@@ -15,14 +15,20 @@
  limitations under the License.
 -->
 
-<manifest package="com.example.android.midisynth"
-          xmlns:android="http://schemas.android.com/apk/res/android"
-          android:versionCode="1"
-          android:versionName="1.0">
+<manifest
+    package="com.example.android.midisynth"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:versionCode="1"
+    android:versionName="1.0"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-feature
-        android:name="android.software.midi"
-        android:required="true"/>
+    <uses-feature android:name="android.hardware.usb.host" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
+
+    <uses-sdk tools:overrideLibrary="jp.kshoji.blemidi"/>
 
     <application
         android:allowBackup="true"
@@ -50,6 +56,9 @@
                 android:resource="@xml/synth_device_info"/>
         </service>
 
+        <service android:name="jp.kshoji.driver.midi.service.MultipleMidiService" android:exported="false" />
+        <service android:name="jp.kshoji.blemidi.service.BleMidiCentralService" android:exported="false" />
+        <service android:name="jp.kshoji.blemidi.service.BleMidiPeripheralService" android:exported="false" />
     </application>
 
 </manifest>

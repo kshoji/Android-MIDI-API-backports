@@ -18,7 +18,6 @@ package com.example.android.common.midi;
 
 import android.media.midi.MidiDeviceInfo;
 import android.media.midi.MidiDeviceInfo.PortInfo;
-import android.util.Log;
 
 // Wrapper for a MIDI device and port description.
 public class MidiPortWrapper {

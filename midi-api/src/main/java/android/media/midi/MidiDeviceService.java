@@ -10,13 +10,11 @@ import android.hardware.usb.UsbDevice;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import jp.kshoji.blemidi.service.BleMidiCentralService;
 import jp.kshoji.blemidi.service.BleMidiPeripheralService;
@@ -26,7 +24,6 @@ import jp.kshoji.driver.midi.device.MidiOutputDevice;
 import jp.kshoji.driver.midi.listener.OnMidiDeviceAttachedListener;
 import jp.kshoji.driver.midi.listener.OnMidiDeviceDetachedListener;
 import jp.kshoji.driver.midi.service.MultipleMidiService;
-import jp.kshoji.driver.midi.service.MultipleMidiService.LocalBinder;
 
 /**
  * A service that implements a virtual MIDI device.

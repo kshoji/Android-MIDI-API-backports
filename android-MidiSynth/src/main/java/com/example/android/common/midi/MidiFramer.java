@@ -17,7 +17,6 @@
 package com.example.android.common.midi;
 
 import android.media.midi.MidiReceiver;
-import android.util.Log;
 
 import java.io.IOException;
 
