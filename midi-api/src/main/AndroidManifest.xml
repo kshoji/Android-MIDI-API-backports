@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="jp.kshoji.lib.midi">
+    package="jp.kshoji.lib.midi"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-sdk tools:overrideLibrary="jp.kshoji.blemidi"/>
 
 </manifest>

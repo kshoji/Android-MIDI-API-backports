@@ -7,8 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.hardware.usb.UsbDevice;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -56,113 +58,109 @@ public abstract class MidiDeviceService extends Service {
     private BleMidiCentralService bleMidiCentralService;
     private BleMidiPeripheralService bleMidiPeripheralService;
 
-    private final Set<MidiInputDevice> usbMidiInputDevices = new HashSet<MidiInputDevice>();
-    private final Set<jp.kshoji.blemidi.device.MidiInputDevice> bleMidiInputDevices = new HashSet<jp.kshoji.blemidi.device.MidiInputDevice>();
+    private final Collection<MidiInputDevice> usbMidiInputDevices = new HashSet<MidiInputDevice>();
+    private final Collection<jp.kshoji.blemidi.device.MidiInputDevice> bleMidiInputDevices = new HashSet<jp.kshoji.blemidi.device.MidiInputDevice>();
 
-    private final Map<Object, MidiOutputPort> midiOutputPorts = new HashMap<Object, MidiOutputPort>();
     private final Map<Object, MidiReceiver> outputPortReceivers = new HashMap<Object, MidiReceiver>();
 
-    private final Set<MidiReceiver> inputPortReceivers = new HashSet<MidiReceiver>();
+    private final Collection<MidiReceiver> inputPortReceivers = new HashSet<MidiReceiver>();
 
     private final OnMidiDeviceAttachedListener usbMidiDeviceAttachedListener = new OnMidiDeviceAttachedListener() {
         @Override
-        public void onDeviceAttached(UsbDevice usbDevice) {
+        public void onDeviceAttached(final UsbDevice usbDevice) {
             // do nothing
         }
 
         @Override
-        public synchronized void onMidiInputDeviceAttached(MidiInputDevice midiInputDevice) {
-            midiOutputPorts.put(midiInputDevice, new MidiOutputPort(midiInputDevice));
+        public synchronized void onMidiInputDeviceAttached(final MidiInputDevice midiInputDevice) {
+            usbMidiInputDevices.add(midiInputDevice);
         }
 
         @Override
-        public synchronized void onMidiOutputDeviceAttached(MidiOutputDevice midiOutputDevice) {
+        public synchronized void onMidiOutputDeviceAttached(final MidiOutputDevice midiOutputDevice) {
             outputPortReceivers.put(midiOutputDevice, new MidiInputPort(midiOutputDevice));
         }
     };
 
     private final OnMidiDeviceDetachedListener usbMidiDeviceDetachedListener = new OnMidiDeviceDetachedListener() {
         @Override
-        public void onDeviceDetached(UsbDevice usbDevice) {
+        public void onDeviceDetached(final UsbDevice usbDevice) {
             // do nothing
         }
 
         @Override
-        public synchronized void onMidiInputDeviceDetached(MidiInputDevice midiInputDevice) {
+        public synchronized void onMidiInputDeviceDetached(final MidiInputDevice midiInputDevice) {
             usbMidiInputDevices.remove(midiInputDevice);
-            midiOutputPorts.remove(midiInputDevice);
         }
 
         @Override
-        public synchronized void onMidiOutputDeviceDetached(MidiOutputDevice midiOutputDevice) {
+        public synchronized void onMidiOutputDeviceDetached(final MidiOutputDevice midiOutputDevice) {
             outputPortReceivers.remove(midiOutputDevice);
         }
     };
 
     private final jp.kshoji.blemidi.listener.OnMidiDeviceAttachedListener bleMidiDeviceAttachedListener = new jp.kshoji.blemidi.listener.OnMidiDeviceAttachedListener() {
         @Override
-        public synchronized void onMidiInputDeviceAttached(jp.kshoji.blemidi.device.MidiInputDevice midiInputDevice) {
+        public synchronized void onMidiInputDeviceAttached(final jp.kshoji.blemidi.device.MidiInputDevice midiInputDevice) {
             bleMidiInputDevices.add(midiInputDevice);
-            midiOutputPorts.put(midiInputDevice, new MidiOutputPort(midiInputDevice));
         }
 
         @Override
-        public synchronized void onMidiOutputDeviceAttached(jp.kshoji.blemidi.device.MidiOutputDevice midiOutputDevice) {
+        public synchronized void onMidiOutputDeviceAttached(final jp.kshoji.blemidi.device.MidiOutputDevice midiOutputDevice) {
             outputPortReceivers.put(midiOutputDevice, new MidiInputPort(midiOutputDevice));
         }
     };
 
     private final jp.kshoji.blemidi.listener.OnMidiDeviceDetachedListener bleMidiDeviceDetachedListener = new jp.kshoji.blemidi.listener.OnMidiDeviceDetachedListener() {
         @Override
-        public synchronized void onMidiInputDeviceDetached(jp.kshoji.blemidi.device.MidiInputDevice midiInputDevice) {
+        public synchronized void onMidiInputDeviceDetached(final jp.kshoji.blemidi.device.MidiInputDevice midiInputDevice) {
             bleMidiInputDevices.remove(midiInputDevice);
-            midiOutputPorts.remove(midiInputDevice);
         }
 
         @Override
-        public synchronized void onMidiOutputDeviceDetached(jp.kshoji.blemidi.device.MidiOutputDevice midiOutputDevice) {
+        public synchronized void onMidiOutputDeviceDetached(final jp.kshoji.blemidi.device.MidiOutputDevice midiOutputDevice) {
             outputPortReceivers.remove(midiOutputDevice);
         }
     };
 
-    private final ServiceConnection usbMidiServiceConnection = new ServiceConnection(){
+    private final ServiceConnection usbMidiServiceConnection = new ServiceConnection() {
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            usbMidiService = ((LocalBinder)service).getService();
+        public void onServiceConnected(final ComponentName name, final IBinder service) {
+            usbMidiService = ((MultipleMidiService.LocalBinder)service).getService();
             usbMidiService.setOnMidiDeviceAttachedListener(usbMidiDeviceAttachedListener);
             usbMidiService.setOnMidiDeviceDetachedListener(usbMidiDeviceDetachedListener);
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
+        public void onServiceDisconnected(final ComponentName name) {
             usbMidiService = null;
         }
     };
 
     private final ServiceConnection bleMidiCentralServiceConnection = new ServiceConnection() {
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
+        public void onServiceConnected(final ComponentName name, final IBinder service) {
             bleMidiCentralService = ((BleMidiCentralService.LocalBinder)service).getService();
             bleMidiCentralService.setOnMidiDeviceAttachedListener(bleMidiDeviceAttachedListener);
             bleMidiCentralService.setOnMidiDeviceDetachedListener(bleMidiDeviceDetachedListener);
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
+        public void onServiceDisconnected(final ComponentName name) {
             bleMidiCentralService = null;
         }
     };
 
     private final ServiceConnection bleMidiPeripheralServiceConnection = new ServiceConnection() {
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
+        public void onServiceConnected(final ComponentName name, final IBinder service) {
             bleMidiPeripheralService = ((BleMidiPeripheralService.LocalBinder)service).getService();
             bleMidiPeripheralService.setOnMidiDeviceAttachedListener(bleMidiDeviceAttachedListener);
             bleMidiPeripheralService.setOnMidiDeviceDetachedListener(bleMidiDeviceDetachedListener);
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName name) {
+        public void onServiceDisconnected(final ComponentName name) {
             bleMidiPeripheralService = null;
         }
     };
@@ -192,6 +190,21 @@ public abstract class MidiDeviceService extends Service {
                 inputPortReceivers.add(midiReceiver);
             }
         }
+    }
+
+    private final IBinder binder = new LocalBinder();
+    public class LocalBinder extends Binder {
+        LocalBinder() {
+        }
+
+        public MidiDeviceService getService() {
+            return MidiDeviceService.this;
+        }
+    }
+
+    @Override
+    public IBinder onBind(final Intent intent) {
+        return binder;
     }
 
     /**
@@ -226,7 +239,7 @@ public abstract class MidiDeviceService extends Service {
      * Called to notify when an our {@link MidiDeviceStatus} has changed
      * @param status the number of the port that was opened
      */
-    public void onDeviceStatusChanged(MidiDeviceStatus status) {
+    public void onDeviceStatusChanged(final MidiDeviceStatus status) {
     }
 
     /**

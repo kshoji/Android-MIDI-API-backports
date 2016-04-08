@@ -309,23 +309,6 @@ public final class MidiManager {
         void onDeviceOpened(MidiDevice device);
     }
 
-    private static volatile MidiManager instance;
-    private static final Object SINGLETON_LOCK = new Object();
-    public static MidiManager getInstance(final Context context) {
-        MidiManager result = instance;
-        if (result == null) {
-            synchronized (SINGLETON_LOCK) {
-                result = instance;
-                if (result == null) {
-                    result = new MidiManager(context);
-                    instance = result;
-                }
-            }
-        }
-
-        return result;
-    }
-
     MidiManager(final Context context) {
         Intent intent = new Intent(context, MultipleMidiService.class);
         context.startService(intent);
